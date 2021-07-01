@@ -3,16 +3,6 @@ import numpy as np
 
 from helper import *
 
-# day_reqs = [[7, 4, 3, 5, 4, 3, 7]]
-#
-# total_day_requirements = ([sum(x) for x in zip(*day_reqs)])
-#
-# department_names = {0: 'Department'}
-#
-# total_users = max(total_day_requirements)  # number of users
-# total_departments = len(day_reqs)  # number of departments
-# days = 7
-
 
 def schedule(employees, users, departments, day_requirement, days,
              department_names):
@@ -79,20 +69,3 @@ def schedule(employees, users, departments, day_requirement, days,
     print("Status", pulp.LpStatus[status])
     return user_sums, dashboard, status, day_sums
 
-
-# user_sums, dashboard, status = schedule(total_users, total_departments,
-#                                         day_reqs,days,department_names)
-
-# while status == -1:
-#     print('Status infeasible OR one or more users have been allocated more '
-#           'than 5 days of work -- adding one user: {}->{}'.
-#           format(total_users, total_users + 1))
-#     total_users += 1
-#     user_sums, dashboard, status = schedule(total_users, total_departments,
-#                                             day_reqs)
-
-# multi_col = setMultiCol(week_days)  #  xronis
-# dashboard.columns = pd.MultiIndex.from_tuples(multi_col)  #  xronis
-# user_table = dashboard.groupby('User').sum()
-# user_sums = user_table.sum(axis=1)
-# day_sums = user_table.sum(axis=0)

@@ -27,15 +27,12 @@ class PopUpWindow(QMainWindow):
         # self.pop_up_table.verticalHeader().\
         #     setSectionResizeMode(0,QHeaderView.Stretch)
         # ---> Buttons
-
         self.add_rows_button = setButtonPopUpWindow('Add Rows')
         self.remove_rows_button = setButtonPopUpWindow('Remove Rows')
         self.ok_button = setButtonPopUpWindow('Ok')
         self.clear_button = setButtonPopUpWindow('Clear')
         self.exit_button = setButtonPopUpWindow('Exit')
-        # ---> Filling the Layouts
-
-        
+        # ---> Filling the Layouts        
         horizontal_buttons_layout.addWidget(self.add_rows_button)
         horizontal_buttons_layout.addWidget(self.remove_rows_button)
         horizontal_buttons_layout.addWidget(self.ok_button)
@@ -187,7 +184,7 @@ class MainWindow(QMainWindow):
                 schedule(self.list_from_csv, total_users, tot_departments,
                          day_reqs, days, department_names)
 
-            while self.status == -1:
+            while (self.user_sums > 5).any() or self.status == -1:
                 print('Status infeasible -- adding one user: {}->{}'.format(
                     total_users, total_users + 1))
                 total_users += 1
