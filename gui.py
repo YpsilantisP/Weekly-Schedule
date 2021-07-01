@@ -102,9 +102,9 @@ class MainWindow(QMainWindow):
         horizontal_buttons_layout = QHBoxLayout()
         # ---> Tables
         self.names_model = QtGui.QStandardItemModel(self)
-        self.employee_names_table = QTableView()
-        self.employee_names_table.setModel(self.names_model)
-        self.employee_names_table.setMaximumHeight(80)
+        self.names_table = QTableView()
+        self.names_table.setModel(self.names_model)
+        self.names_table.setMaximumHeight(80)
 
         self.schedule_model = QtGui.QStandardItemModel(self)
         self.schedule_table = QTableView()
@@ -127,7 +127,7 @@ class MainWindow(QMainWindow):
         horizontal_buttons_layout.addWidget(self.export_button)
         horizontal_buttons_layout.addWidget(self.clear_button)
         vertical_final_layout.addLayout(horizontal_buttons_layout)
-        vertical_final_layout.addWidget(self.employee_names_table)
+        vertical_final_layout.addWidget(self.names_table)
         vertical_final_layout.addWidget(self.schedule_table)
         vertical_final_layout.addWidget(self.summary_table)
         self.setLayout(vertical_final_layout)
@@ -137,8 +137,6 @@ class MainWindow(QMainWindow):
         # Actions
         # ---> Buttons
         self.import_file_button.clicked.connect(self.openFunc)
-        self.import_file_button. \
-            setStatusTip("Select a file to use for comparison")
         self.days_required_button.clicked.connect(self.setDaysForSchedule)
         self.calculate_schedule_button.clicked.connect(self.calculateSchedule)
         self.export_button.clicked.connect(self.exportResults)
@@ -159,7 +157,7 @@ class MainWindow(QMainWindow):
             else:
                 self.list_from_csv = readUserFile(self.file_name[0])
                 setNamesToQt(self.list_from_csv, self.names_model,
-                             self.employee_names_table)
+                             self.names_table)
                 return
         except:
             self.file_name = []
@@ -201,12 +199,18 @@ class MainWindow(QMainWindow):
 
 
     def exportResults(self):
-        _df = self.dashboard.copy()
-        _df.columns = pd.MultiIndex.from_tuples(setMultiCols(wk_days))
-        _df.to_csv('Schedule {}.csv'.format(pd.to_datetime('today').date()))
-        return
+        file_name = None
+        file_name = QFileDialog.getSaveFileName(self, 'Save file', '',
+        'Excel files (*.xlsx)')[0] # returns tuple
+        try:
+            _df = self.dashboard.copy()
+            _df.columns = pd.MultiIndex.from_tuples(setMultiCols(wk_days))
+            _df.to_excel(file_name)
+        except:
+            return
 
     def clearAll(self):
-        self.employee_names_table.clear()
-        self.pop_up_window.clear()
+        self.names_model.clear()
+        self.schedule_model.clear()
+        self.summary_model.clear()
         return

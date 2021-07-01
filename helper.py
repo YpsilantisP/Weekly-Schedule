@@ -17,7 +17,6 @@ def setMultiCols(week_days):
     dates = [(date.today() + timedelta(days=i + j)).strftime("%d %B %y")
              for j in range(7)]
     _list =  list(zip(dates, week_days))
-    _list.append(('','Weekly Summary'))
     return _list
 
 
