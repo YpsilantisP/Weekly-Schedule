@@ -27,6 +27,7 @@ class PopUpWindow(QMainWindow):
         # self.pop_up_table.verticalHeader().\
         #     setSectionResizeMode(0,QHeaderView.Stretch)
         # ---> Buttons
+        
         self.add_rows_button = setButtonPopUpWindow('Add Rows')
         self.remove_rows_button = setButtonPopUpWindow('Remove Rows')
         self.ok_button = setButtonPopUpWindow('Ok')
