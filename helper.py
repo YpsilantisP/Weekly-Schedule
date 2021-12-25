@@ -21,6 +21,13 @@ def setMultiCols(week_days):
     return _list
 
 
+def setTable(model, max_table_height):
+    table = QTableView()
+    table.setModel(model)
+    if not isinstance(max_table_height, type(None)):
+        table.setMaximumHeight(max_table_height)
+    return table
+
 def setButtonMainWindow(name):
     button = QPushButton(name)
     button.setCursor(Qt.PointingHandCursor)

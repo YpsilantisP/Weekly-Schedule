@@ -23,22 +23,18 @@ class PopUpWindow(QMainWindow):
         # ---> Pop Up Table
         self.pop_up_table = QTableWidget(1, 7)
         self.pop_up_table.setHorizontalHeaderLabels(wk_days)
-        [self.pop_up_table.horizontalHeader().setSectionResizeMode(
-            i, QHeaderView.Stretch) for i in range(7)]
-        # self.pop_up_table.verticalHeader().\
-        #     setSectionResizeMode(0,QHeaderView.Stretch)
+        for i in range(self.pop_up_table.columnCount()):
+            self.pop_up_table.horizontalHeader().setSectionResizeMode(i, QHeaderView.Stretch)
         # ---> Buttons
         self.add_rows_button = setButtonPopUpWindow('Add Rows')
         self.remove_rows_button = setButtonPopUpWindow('Remove Rows')
         self.ok_button = setButtonPopUpWindow('Ok')
         self.clear_button = setButtonPopUpWindow('Clear')
         self.exit_button = setButtonPopUpWindow('Exit')
-        # ---> Filling the Layouts        
-        horizontal_buttons_layout.addWidget(self.add_rows_button)
-        horizontal_buttons_layout.addWidget(self.remove_rows_button)
-        horizontal_buttons_layout.addWidget(self.ok_button)
-        horizontal_buttons_layout.addWidget(self.clear_button)
-        horizontal_buttons_layout.addWidget(self.exit_button)
+        # ---> Filling the Layouts
+        for i in [self.add_rows_button, self.remove_rows_button, self.ok_button, self.clear_button, self.exit_button]:
+            horizontal_buttons_layout.addWidget(i)
+
         vertical_final_layout.addWidget(self._label, alignment=Qt.AlignTop)
         vertical_final_layout.addWidget(self.pop_up_table)
         vertical_final_layout.addLayout(horizontal_buttons_layout)
@@ -52,7 +48,7 @@ class PopUpWindow(QMainWindow):
         self.remove_rows_button.clicked.connect(self.removeRow)
         self.ok_button.clicked.connect(self.UpdateList)
         self.clear_button.clicked.connect(self.clearTable)
-        self.exit_button.clicked.connect(lambda: self.close())
+        self.exit_button.clicked.connect(self.close)
 
     def addRow(self):
         rowCount = self.pop_up_table.rowCount()
@@ -72,8 +68,7 @@ class PopUpWindow(QMainWindow):
             for i in range(self.pop_up_table.rowCount()):
                 for j in range(self.pop_up_table.columnCount()):
                     if self.pop_up_table.item(i, j):
-                        self.manual_inputs[i][j] = \
-                            int(self.pop_up_table.item(i, j).text())
+                        self.manual_inputs[i][j] = int(self.pop_up_table.item(i, j).text())
         except ValueError:
             setMsgBoxOnlyIntegersAllowed()
         if any(value is None for row in self.manual_inputs for value in row):
@@ -92,7 +87,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         # ---> Empty Vars
-        self.list_from_csv = []
+        self.employee_names = []
         self.pop_up_window = PopUpWindow()
         # ---> Specifications of MainWindow
         self.setGeometry(200, 200, 1137, 600)
@@ -103,18 +98,13 @@ class MainWindow(QMainWindow):
         horizontal_buttons_layout = QHBoxLayout()
         # ---> Tables
         self.names_model = QtGui.QStandardItemModel(self)
-        self.employee_names_table = QTableView()
-        self.employee_names_table.setModel(self.names_model)
-        self.employee_names_table.setMaximumHeight(80)
+        self.employee_names_table = setTable(self.names_model, 80)
 
         self.schedule_model = QtGui.QStandardItemModel(self)
-        self.schedule_table = QTableView()
-        self.schedule_table.setModel(self.schedule_model)
+        self.schedule_table = setTable(self.schedule_model, None)
 
         self.summary_model = QtGui.QStandardItemModel(self)
-        self.summary_table = QTableView()
-        self.summary_table.setModel(self.summary_model)
-        self.summary_table.setMaximumHeight(120)
+        self.summary_table = setTable(self.summary_model, 120)
         # ---> Buttons
         self.import_file_button = setButtonMainWindow('Import File')
         self.days_required_button = setButtonMainWindow('Add Requirements')
@@ -138,8 +128,7 @@ class MainWindow(QMainWindow):
         # Actions
         # ---> Buttons
         self.import_file_button.clicked.connect(self.openFunc)
-        self.import_file_button. \
-            setStatusTip("Select a file to use for comparison")
+        self.import_file_button.setStatusTip("Select a file to use for comparison")
         self.days_required_button.clicked.connect(self.setDaysForSchedule)
         self.calculate_schedule_button.clicked.connect(self.calculateSchedule)
         self.export_button.clicked.connect(self.exportResults)
@@ -147,31 +136,27 @@ class MainWindow(QMainWindow):
 
     def openFunc(self):
         """
-        Try except is used prevent user from loading wrong data
-        the small if statement 168 row will check if import a file or not"""
+        This function allows the user to load data while,
+        preventing them from loading a file with more than one columns.
+        """
         try:
-            self.file_name = \
-                QFileDialog.getOpenFileName(self, 'Open File',
-                                            os.path.expanduser('~/Desktop'),
-                                            'Excel (*.csv)')
+            self.file_name = QFileDialog.getOpenFileName(self, 'Open File', os.path.expanduser('~/Desktop'),
+                                                         'Excel (*.csv)')
             if self.file_name[0] == "":
                 self.file_name = []
-                return
             else:
-                self.list_from_csv = readUserFile(self.file_name[0])
-                setNamesToQt(self.list_from_csv, self.names_model,
+                self.employee_names = readUserFile(self.file_name[0])
+                setNamesToQt(self.employee_names, self.names_model,
                              self.employee_names_table)
-                return
         except:
             self.file_name = []
-            return
 
     def setDaysForSchedule(self):
         self.pop_up_window.show()
 
     def calculateSchedule(self):
         day_reqs = None
-        day_reqs = checkUsersInputs(self.pop_up_window.manual_inputs, self.list_from_csv)
+        day_reqs = checkUsersInputs(self.pop_up_window.manual_inputs, self.employee_names)
         if day_reqs == None:
             return
         else:
@@ -182,7 +167,7 @@ class MainWindow(QMainWindow):
             days = 7
 
             self.user_sums, self.dashboard, self.status, self.day_sums = \
-                schedule(self.list_from_csv, total_users, tot_departments,
+                schedule(self.employee_names, total_users, tot_departments,
                          day_reqs, days, department_names)
 
             while (self.user_sums > 5).any() or self.status == -1:
@@ -190,16 +175,12 @@ class MainWindow(QMainWindow):
                     total_users, total_users + 1))
                 total_users += 1
                 self.user_sums, self.dashboard, self.status, self.day_sums = \
-                    schedule(self.list_from_csv, total_users, tot_departments,
+                    schedule(self.employee_names, total_users, tot_departments,
                              day_reqs, days, department_names)
-
-
             setRequirementsToQt(setMultiCols(wk_days), self.dashboard,
                                 self.schedule_model, self.schedule_table)
-
             setSummaryToQt(self.user_sums, self.day_sums, self.summary_model,
                            self.summary_table)
-
 
     def exportResults(self):
         _df = self.dashboard.copy()
